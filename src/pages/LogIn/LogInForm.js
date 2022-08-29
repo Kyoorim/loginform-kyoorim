@@ -33,14 +33,14 @@ const Input = styled.input`
   }
 `;
 
-const LogInForm = () => {
+const LogInForm = (props) => {
   return (
     <Card>
       <Form>
         <Label>Email</Label>
-        <Input></Input>
+        <Input id="email" label="Email" type="email"></Input>
         <Label>Password</Label>
-        <Input></Input>
+        <Input id="password" label="Password" type="password"></Input>
         <Button>Log in</Button>
       </Form>
     </Card>

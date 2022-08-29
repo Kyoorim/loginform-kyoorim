@@ -1,9 +1,11 @@
+import { useState, useRef, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Card from "../../UI/Card";
 import Button from "../../UI/Button";
 
 import styled from "styled-components";
+import AuthContext from "../../store/auth-context";
 
 const Wrapper = styled.div`
   margin-right: 20px;
@@ -74,24 +76,82 @@ const SignUpForm = () => {
     navigate("/login");
   };
 
+  const [isLoading, setIsLoading] = useState();
+
+  const nameInputRef = useRef();
+  const emailInputRef = useRef();
+  const passwordInputRef = useRef();
+
+  const authCtx = useContext(AuthContext);
+
+  const submitHandler = (event) => {
+    event.preventDefault();
+
+    const enteredName = nameInputRef.current.value;
+    const enteredEmail = emailInputRef.current.value;
+    const enteredPassword = passwordInputRef.current.value;
+
+    setIsLoading(true);
+    fetch(
+      "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyAL_sFLjUbNmnkOCMW020d3_c3AKfY-msI",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          displayName: enteredName,
+          email: enteredEmail,
+          password: enteredPassword,
+          returnSecureToken: true,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    )
+      .then((res) => {
+        setIsLoading(false);
+        if (res.ok) {
+          return res.json();
+        } else {
+          res.json().then((data) => {
+            console.log(data);
+            let errorMessage = "Authentication failed";
+            throw new Error(errorMessage);
+          });
+        }
+      })
+      .then((data) => {
+        authCtx.login(data.idToken);
+        let successMessage = "Success";
+        alert(successMessage);
+      })
+      .catch((err) => {
+        alert(err.message);
+      });
+  };
+
   return (
     <Wrapper>
       <Title>
         Create your Stack Overflow account. It’s free and only takes a minute.
       </Title>
       <Card>
-        <Form>
-          <Label>Display name</Label>
-          <Input></Input>
-          <Label>Email</Label>
-          <Input></Input>
-          <Label>Password</Label>
-          <Input></Input>
+        <Form onSubmit={submitHandler}>
+          <Label htmlFor="name">Display name</Label>
+          <Input type="name" id="name" ref={nameInputRef}></Input>
+          <Label htmlFor="email">Email</Label>
+          <Input type="email" id="email" required ref={emailInputRef}></Input>
+          <Label htmlFor="password">Password</Label>
+          <Input
+            type="password"
+            id="password"
+            required
+            ref={passwordInputRef}
+          ></Input>
           <span>
             Passwords must contain at least eight characters, including at least
             1 letter and 1 number.
           </span>
-          <Button>Sign up</Button>
+          <Button type="submit">Sign up</Button>
           <span>
             By clicking “Sign up”, you agree to our terms of service, privacy
             policy and cookie policy

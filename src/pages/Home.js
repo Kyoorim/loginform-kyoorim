@@ -1,5 +1,9 @@
 const Home = () => {
-  return;
+  return (
+    <div>
+      <div>HOME</div>
+    </div>
+  );
 };
 
 export default Home;
