@@ -131,9 +131,12 @@ const SignUpForm = () => {
 
   return (
     <Wrapper>
-      <Title>
-        Create your Stack Overflow account. It’s free and only takes a minute.
-      </Title>
+      {!isLoading && (
+        <Title>
+          Create your Stack Overflow account. It’s free and only takes a minute.
+        </Title>
+      )}
+      {isLoading && <p>Sending Request....</p>}
       <Card>
         <Form onSubmit={submitHandler}>
           <Label htmlFor="name">Display name</Label>
