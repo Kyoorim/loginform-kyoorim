@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useState, useRef, useContext } from "react";
+//로그인 성공 후 리다이렉션
+import { useNavigate } from "react-router-dom";
 
 import styled from "styled-components";
 
+import AuthContext from "../../store/auth-context";
 import Card from "../../UI/Card";
 import Button from "../../UI/Button";
 
@@ -34,14 +37,87 @@ const Input = styled.input`
 `;
 
 const LogInForm = (props) => {
+  // 로그인 성공후 리다이렉션
+  const navigate = useNavigate();
+
+  const emailInputRef = useRef();
+  const passwordInputRef = useRef();
+
+  const authCtx = useContext(AuthContext);
+
+  const [isLogin, setIsLogin] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const submitHandler = (event) => {
+    event.preventDefault();
+
+    const enteredEmail = emailInputRef.current.value;
+    const enteredPassword = passwordInputRef.current.value;
+
+    //Add validation HERE
+    console.log(enteredEmail);
+    setIsLoading(true);
+    let url;
+    if (isLogin) {
+      url =
+        "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyAL_sFLjUbNmnkOCMW020d3_c3AKfY-msI";
+    } else {
+    }
+    fetch(url, {
+      method: "POST",
+      body: JSON.stringify({
+        email: enteredEmail,
+        password: enteredPassword,
+        returnSecureToken: true,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => {
+        setIsLoading(false);
+        if (res.ok) {
+          return res.json();
+        } else {
+          return res.json().then((data) => {
+            let errorMessage = "Login failed !";
+            throw new Error(errorMessage);
+          });
+        }
+      })
+      .then((data) => {
+        //로그인에 성공헤 token(idToken)이 생기는 시점
+        authCtx.login(data.idToken); // 이렇게 토큰 설정해줌
+        alert("Login Success !");
+
+        //로그인 성공 후 리다이렉션
+        navigate("/");
+      })
+      .catch((err) => {
+        alert(err.message);
+      });
+  };
+
   return (
     <Card>
-      <Form>
+      <Form onSubmit={submitHandler}>
         <Label>Email</Label>
-        <Input id="email" label="Email" type="email"></Input>
+        <Input
+          id="email"
+          label="Email"
+          type="email"
+          required
+          ref={emailInputRef}
+        ></Input>
         <Label>Password</Label>
-        <Input id="password" label="Password" type="password"></Input>
-        <Button>Log in</Button>
+        <Input
+          id="password"
+          label="Password"
+          type="password"
+          required
+          ref={passwordInputRef}
+        ></Input>
+        <Button type="submit">Log in</Button>
       </Form>
     </Card>
   );
